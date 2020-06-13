@@ -1,5 +1,9 @@
 package com.example.servingwebcontent;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
@@ -7,16 +11,20 @@ import com.jcraft.jsch.Session;
 import java.sql.*;
 
 public class DatabaseConnection {
-    public static void main(String[] args) throws SQLException, JSchException {
-        int lport=7070;
-        int rport=5432;
-        String lhost="rzssh1.informatik.uni-hamburg.de";
-        String rhost="basecamp-bigdata.informatik.uni-hamburg.de";
-        String user="REDACTED_SSH_USER";
-        String password="REDACTED_SSH_PASSWORD";
-        String dbuser="REDACTED_DB_USER";
-        String dbpassword="REDACTED_DB_PASSWORD";
-        String url="jdbc:postgresql://localhost:" + lport + "/webcrawl";
+    public static void main(String[] args) throws SQLException, JSchException, IOException {
+        InputStream input = DatabaseConnection.class.getClassLoader().getResourceAsStream("database.properties");
+        Properties prop = new Properties();
+        prop.load(input);
+
+        int lport = Integer.parseInt(prop.getProperty("lport"));
+        int rport = Integer.parseInt(prop.getProperty("rport"));
+        String lhost = prop.getProperty("lhost");
+        String rhost = prop.getProperty("rhost");
+        String user = prop.getProperty("user");
+        String password = prop.getProperty("password");
+        String dbuser = prop.getProperty("dbuser");
+        String dbpassword = prop.getProperty("dbpassword");
+        String url = "jdbc:postgresql://localhost:" + lport + "/webcrawl";
         String driver="org.postgresql.Driver";
         Connection conn = null;
         Session session= null;
@@ -46,9 +54,9 @@ public class DatabaseConnection {
                 System.out.format("%s, %s, %s\n", id, ct, pt);
             }
             stmt.close();
-        }catch(Exception e){
+        } catch(Exception e){
             e.printStackTrace();
-        }finally{
+        } finally{
             if(conn != null && !conn.isClosed()){
                 conn.close();
             }
